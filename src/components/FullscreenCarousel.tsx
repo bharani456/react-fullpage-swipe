@@ -109,12 +109,12 @@ export const FullscreenCarousel = () => {
                   className="h-full w-full object-cover"
                   autoPlay
                   loop
-                  muted
                   playsInline
+                  controls
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-center px-4 animate-fade-in">
                   <h2 className="text-5xl md:text-7xl font-bold mb-4 text-primary-foreground drop-shadow-2xl">
                     {slide.title}
