@@ -15,6 +15,8 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        carousel: "bg-primary-foreground/10 backdrop-blur-md text-primary-foreground border-2 border-primary-foreground/30 hover:bg-primary-foreground/20 hover:scale-110 hover:shadow-lg hover:shadow-primary/50 transition-all duration-300",
+        carouselDot: "w-3 h-3 rounded-full bg-primary-foreground/30 hover:bg-primary-foreground/60 transition-all duration-300 data-[active=true]:bg-primary-foreground data-[active=true]:w-8",
       },
       size: {
         default: "h-10 px-4 py-2",
