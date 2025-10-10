@@ -6,19 +6,41 @@ import slide1 from "@/assets/slide1.jpg";
 import slide2 from "@/assets/slide2.jpg";
 import slide3 from "@/assets/slide3.jpg";
 
-const slides = [
+type SlideType = {
+  type: "image" | "video";
+  src: string;
+  title: string;
+  description: string;
+};
+
+const slides: SlideType[] = [
   {
-    image: slide1,
+    type: "image",
+    src: slide1,
     title: "Discover Amazing Experiences",
     description: "Explore a world of possibilities with stunning visuals",
   },
   {
-    image: slide2,
+    type: "video",
+    src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     title: "Innovative Design",
     description: "Modern aesthetics meet cutting-edge functionality",
   },
   {
-    image: slide3,
+    type: "image",
+    src: slide2,
+    title: "Creative Excellence",
+    description: "Where imagination meets innovation",
+  },
+  {
+    type: "video",
+    src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    title: "Dynamic Content",
+    description: "Experience content in motion",
+  },
+  {
+    type: "image",
+    src: slide3,
     title: "Endless Possibilities",
     description: "Transform your vision into reality",
   },
@@ -75,11 +97,22 @@ export const FullscreenCarousel = () => {
               key={index}
               className="relative min-w-0 flex-[0_0_100%]"
             >
-              <img
-                src={slide.image}
-                alt={slide.title}
-                className="h-full w-full object-cover"
-              />
+              {slide.type === "image" ? (
+                <img
+                  src={slide.src}
+                  alt={slide.title}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <video
+                  src={slide.src}
+                  className="h-full w-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center px-4 animate-fade-in">
