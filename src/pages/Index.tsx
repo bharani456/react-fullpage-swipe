@@ -47,7 +47,7 @@ const Index = () => {
 
           {/* Team Credit */}
           <div className="mt-16 text-center">
-            <p className="text-xl md:text-2xl font-semibold text-foreground">
+            <p className="text-lg md:text-xl text-foreground/80">
               Case study by Team Crivo
             </p>
           </div>
