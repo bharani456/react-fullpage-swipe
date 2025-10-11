@@ -1,5 +1,4 @@
 import { FullscreenCarousel } from "@/components/FullscreenCarousel";
-import { Card } from "@/components/ui/card";
 
 const Index = () => {
   return (
@@ -9,12 +8,12 @@ const Index = () => {
       {/* Case Study Section */}
       <section className="py-20 px-4 md:px-8 bg-background">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold mb-8 text-foreground">
+          <h1 className="text-4xl md:text-6xl font-bold mb-12 text-foreground">
             Case Study
           </h1>
           
-          <div className="space-y-8">
-            <Card className="p-8 hover-scale">
+          <div className="space-y-12">
+            <div>
               <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">
                 Project Overview
               </h2>
@@ -22,9 +21,9 @@ const Index = () => {
                 This innovative project showcases the perfect blend of modern design and cutting-edge technology. 
                 Our team focused on creating an immersive experience that captivates users from the first interaction.
               </p>
-            </Card>
+            </div>
 
-            <Card className="p-8 hover-scale">
+            <div>
               <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">
                 Challenges & Solutions
               </h2>
@@ -33,9 +32,9 @@ const Index = () => {
                 optimized performance strategies. The result is a seamless experience across all devices 
                 with lightning-fast load times and smooth animations.
               </p>
-            </Card>
+            </div>
 
-            <Card className="p-8 hover-scale">
+            <div>
               <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">
                 Results & Impact
               </h2>
@@ -43,7 +42,7 @@ const Index = () => {
                 The project exceeded expectations with remarkable user engagement metrics and positive feedback. 
                 Our approach demonstrates how thoughtful design and technical excellence create lasting impact.
               </p>
-            </Card>
+            </div>
           </div>
 
           {/* Team Credit */}
