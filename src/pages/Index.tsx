@@ -14,7 +14,7 @@ const Index = () => {
           
           <div className="space-y-12">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground/80">
                 Project Overview
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
@@ -24,7 +24,7 @@ const Index = () => {
             </div>
 
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground/80">
                 Challenges & Solutions
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
@@ -35,7 +35,7 @@ const Index = () => {
             </div>
 
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary">
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground/80">
                 Results & Impact
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
