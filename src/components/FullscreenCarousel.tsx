@@ -1,54 +1,37 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import slide1 from "@/assets/slide1.jpg";
-import slide2 from "@/assets/slide2.jpg";
-import slide3 from "@/assets/slide3.jpg";
+// Using direct asset paths to avoid import type resolution issues
 
 type SlideType = {
-  type: "image" | "video";
+  type: "video" | "image";
   src: string;
   title: string;
   description: string;
 };
 
 const slides: SlideType[] = [
-  {
-    type: "image",
-    src: slide1,
-    title: "Discover Amazing Experiences",
-    description: "Explore a world of possibilities with stunning visuals",
-  },
-  {
-    type: "video",
-    src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-    title: "Innovative Design",
-    description: "Modern aesthetics meet cutting-edge functionality",
-  },
-  {
-    type: "image",
-    src: slide2,
-    title: "Creative Excellence",
-    description: "Where imagination meets innovation",
-  },
-  {
-    type: "video",
-    src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-    title: "Dynamic Content",
-    description: "Experience content in motion",
-  },
-  {
-    type: "image",
-    src: slide3,
-    title: "Endless Possibilities",
-    description: "Transform your vision into reality",
-  },
+  { type: "video", src: "/src/assets/Proposed_solution_SIH_video.mp4", title: "", description: "" },
+  { type: "video", src: "/src/assets/Proposed_solution_SIH_video.mp4", title: "", description: "" },
+  { type: "video", src: "/src/assets/TECHNICAL_APPROACH_SIH.mp4", title: "", description: "" },
+  { type: "video", src: "/src/assets/Innovation_&_fesibility_SIH_video.mp4", title: "", description: "" },
+  { type: "video", src: "/src/assets/Impacts_&_Benefits_SIH_video.mp4", title: "", description: "" },
+  { type: "image", src: "/src/assets/1.JPG", title: "", description: "" },
+  { type: "image", src: "/src/assets/2.JPG", title: "", description: "" },
+  { type: "image", src: "/src/assets/3.JPG", title: "", description: "" },
+  { type: "image", src: "/src/assets/4.JPG", title: "", description: "" },
+  { type: "image", src: "/src/assets/5.JPG", title: "", description: "" },
+  { type: "image", src: "/src/assets/6.JPG", title: "", description: "" },
+  { type: "image", src: "/src/assets/7.JPG", title: "", description: "" },
+  { type: "video", src: "/src/assets/9.MOV", title: "", description: "" },
 ];
 
 export const FullscreenCarousel = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const videoRefs = useRef<HTMLVideoElement[]>([]);
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
@@ -79,17 +62,133 @@ export const FullscreenCarousel = () => {
     };
   }, [emblaApi, onSelect]);
 
-  // Auto-play functionality
+  // Advance to next slide when a video ends (no timed auto-advance)
+
+  // Keep only the active slide unmuted/playing (after user interaction)
+  useEffect(() => {
+    for (let i = 0; i < slides.length; i++) {
+      const vid = videoRefs.current[i];
+      if (!vid) continue; // Not a video slide
+      const isActive = i === selectedIndex;
+      const slide = slides[i];
+      
+      if (isActive && slide.type === "video") {
+        // Special handling for second slide (index 1) - try to play with sound
+        if (i === 1) {
+          vid.muted = false;
+          const playPromise = vid.play();
+          if (playPromise && typeof playPromise.then === "function") {
+            playPromise.catch(() => {
+              // If unmuted autoplay fails, try muted
+              vid.muted = true;
+              vid.play().catch(() => {});
+            });
+          }
+        } else {
+          // For other videos, use normal logic
+          vid.muted = !hasInteracted;
+          const playPromise = vid.play();
+          if (playPromise && typeof playPromise.then === "function") {
+            playPromise.catch(() => {
+              // If autoplay fails, keep it muted until user interaction
+              vid.muted = true;
+            });
+          }
+        }
+      } else {
+        // Pause and mute non-active videos
+        vid.pause();
+        vid.muted = true;
+      }
+    }
+  }, [selectedIndex, hasInteracted]);
+
+  // Try to enable sound on refresh if browser allows or user previously allowed
+  useEffect(() => {
+    const allowSound = localStorage.getItem("allowSound") === "1";
+    const activeVideo = videoRefs.current[selectedIndex];
+    if (!activeVideo) return;
+    if (allowSound) {
+      setHasInteracted(true);
+      activeVideo.muted = false;
+      const p = activeVideo.play();
+      if (p && typeof p.then === "function") p.catch(() => {});
+      return;
+    }
+    // Attempt unmuted autoplay once; if blocked, keep muted until interaction
+    activeVideo.muted = false;
+    const playAttempt = activeVideo.play();
+    if (playAttempt && typeof playAttempt.then === "function") {
+      playAttempt
+        .then(() => {
+          setHasInteracted(true);
+        })
+        .catch(() => {
+          activeVideo.muted = true;
+        });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-advance from first slide after 0.1 seconds
   useEffect(() => {
     if (!emblaApi) return;
-    const interval = setInterval(() => {
-      emblaApi.scrollNext();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [emblaApi]);
+    if (selectedIndex === 0) {
+      const timer = setTimeout(() => {
+        emblaApi.scrollNext();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedIndex, emblaApi]);
+
+  // Ensure video plays when slide becomes active
+  useEffect(() => {
+    const activeVideo = videoRefs.current[selectedIndex];
+    const activeSlide = slides[selectedIndex];
+    
+    if (activeVideo && activeSlide?.type === "video") {
+      // For the second slide (index 1), try to play with sound immediately
+      if (selectedIndex === 1) {
+        activeVideo.muted = false;
+        const playPromise = activeVideo.play();
+        if (playPromise && typeof playPromise.then === "function") {
+          playPromise.catch(() => {
+            // If unmuted autoplay fails, try muted play
+            activeVideo.muted = true;
+            activeVideo.play().catch(() => {});
+          });
+        }
+      } else {
+        // For other videos, use normal logic
+        activeVideo.muted = !hasInteracted;
+        const playPromise = activeVideo.play();
+        if (playPromise && typeof playPromise.then === "function") {
+          playPromise.catch(() => {
+            // If autoplay fails, try muted play
+            activeVideo.muted = true;
+            activeVideo.play().catch(() => {});
+          });
+        }
+      }
+    }
+  }, [selectedIndex, hasInteracted]);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
+    <div
+      className="relative h-screen w-full overflow-hidden"
+      onPointerDown={() => {
+        setHasInteracted(true);
+        localStorage.setItem("allowSound", "1");
+      }}
+      onKeyDown={() => {
+        setHasInteracted(true);
+        localStorage.setItem("allowSound", "1");
+      }}
+      onClick={() => {
+        setHasInteracted(true);
+        localStorage.setItem("allowSound", "1");
+      }}
+    >
       <div className="h-full" ref={emblaRef}>
         <div className="flex h-full">
           {slides.map((slide, index) => (
@@ -100,30 +199,26 @@ export const FullscreenCarousel = () => {
               {slide.type === "image" ? (
                 <img
                   src={slide.src}
-                  alt={slide.title}
                   className="h-full w-full object-cover"
+                  alt=""
                 />
               ) : (
                 <video
                   src={slide.src}
                   className="h-full w-full object-cover"
                   autoPlay
-                  loop
                   playsInline
-                  controls
+                  muted={!hasInteracted || index !== selectedIndex}
+                  ref={(el) => {
+                    if (el) videoRefs.current[index] = el;
+                  }}
+                  onEnded={() => {
+                    if (emblaApi) emblaApi.scrollNext();
+                  }}
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center px-4 animate-fade-in">
-                  <h2 className="text-5xl md:text-7xl font-bold mb-4 text-primary-foreground drop-shadow-2xl">
-                    {slide.title}
-                  </h2>
-                  <p className="text-xl md:text-2xl text-primary-foreground/90 drop-shadow-lg">
-                    {slide.description}
-                  </p>
-                </div>
-              </div>
+              {/* Text overlay removed as requested */}
             </div>
           ))}
         </div>
