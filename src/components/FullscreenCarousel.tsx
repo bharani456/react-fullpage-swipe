@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 // Using direct asset paths to avoid import type resolution issues
 
 type SlideType = {
@@ -12,19 +10,14 @@ type SlideType = {
 };
 
 const slides: SlideType[] = [
-  { type: "video", src: "/src/assets/Proposed_solution_SIH_video.mp4", title: "", description: "" },
-  { type: "video", src: "/src/assets/Proposed_solution_SIH_video.mp4", title: "", description: "" },
-  { type: "video", src: "/src/assets/TECHNICAL_APPROACH_SIH.mp4", title: "", description: "" },
-  { type: "video", src: "/src/assets/Innovation_&_fesibility_SIH_video.mp4", title: "", description: "" },
-  { type: "video", src: "/src/assets/Impacts_&_Benefits_SIH_video.mp4", title: "", description: "" },
-  { type: "image", src: "/src/assets/1.JPG", title: "", description: "" },
-  { type: "image", src: "/src/assets/2.JPG", title: "", description: "" },
-  { type: "image", src: "/src/assets/3.JPG", title: "", description: "" },
-  { type: "image", src: "/src/assets/4.JPG", title: "", description: "" },
-  { type: "image", src: "/src/assets/5.JPG", title: "", description: "" },
-  { type: "image", src: "/src/assets/6.JPG", title: "", description: "" },
-  { type: "image", src: "/src/assets/7.JPG", title: "", description: "" },
-  { type: "video", src: "/src/assets/9.MOV", title: "", description: "" },
+  { type: "image", src: "/1.JPG", title: "", description: "" },
+  { type: "image", src: "/2.JPG", title: "", description: "" },
+  { type: "image", src: "/3.JPG", title: "", description: "" },
+  { type: "image", src: "/4.JPG", title: "", description: "" },
+  { type: "image", src: "/5.JPG", title: "", description: "" },
+  { type: "image", src: "/6.JPG", title: "", description: "" },
+  { type: "image", src: "/7.JPG", title: "", description: "" },
+  { type: "video", src: "/9.MOV", title: "", description: "" },
 ];
 
 export const FullscreenCarousel = () => {
@@ -73,27 +66,14 @@ export const FullscreenCarousel = () => {
       const slide = slides[i];
       
       if (isActive && slide.type === "video") {
-        // Special handling for second slide (index 1) - try to play with sound
-        if (i === 1) {
-          vid.muted = false;
-          const playPromise = vid.play();
-          if (playPromise && typeof playPromise.then === "function") {
-            playPromise.catch(() => {
-              // If unmuted autoplay fails, try muted
-              vid.muted = true;
-              vid.play().catch(() => {});
-            });
-          }
-        } else {
-          // For other videos, use normal logic
-          vid.muted = !hasInteracted;
-          const playPromise = vid.play();
-          if (playPromise && typeof playPromise.then === "function") {
-            playPromise.catch(() => {
-              // If autoplay fails, keep it muted until user interaction
-              vid.muted = true;
-            });
-          }
+        // For videos, try to play immediately when active
+        vid.muted = !hasInteracted;
+        const playPromise = vid.play();
+        if (playPromise && typeof playPromise.then === "function") {
+          playPromise.catch(() => {
+            // If autoplay fails, keep it muted until user interaction
+            vid.muted = true;
+          });
         }
       } else {
         // Pause and mute non-active videos
@@ -130,15 +110,24 @@ export const FullscreenCarousel = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-advance from first slide after 0.1 seconds
+  // Auto-advance every 2 seconds for images, wait for videos to finish
   useEffect(() => {
     if (!emblaApi) return;
-    if (selectedIndex === 0) {
-      const timer = setTimeout(() => {
-        emblaApi.scrollNext();
-      }, 100);
-      return () => clearTimeout(timer);
+    
+    const activeSlide = slides[selectedIndex];
+    const activeVideo = videoRefs.current[selectedIndex];
+    
+    // If it's a video, don't set auto-advance timer (let video finish naturally)
+    if (activeSlide?.type === "video" && activeVideo) {
+      return;
     }
+    
+    // For images, auto-advance after 2 seconds
+    const timer = setTimeout(() => {
+      emblaApi.scrollNext();
+    }, 2000);
+    
+    return () => clearTimeout(timer);
   }, [selectedIndex, emblaApi]);
 
   // Ensure video plays when slide becomes active
@@ -147,35 +136,39 @@ export const FullscreenCarousel = () => {
     const activeSlide = slides[selectedIndex];
     
     if (activeVideo && activeSlide?.type === "video") {
-      // For the second slide (index 1), try to play with sound immediately
-      if (selectedIndex === 1) {
-        activeVideo.muted = false;
-        const playPromise = activeVideo.play();
-        if (playPromise && typeof playPromise.then === "function") {
-          playPromise.catch(() => {
-            // If unmuted autoplay fails, try muted play
-            activeVideo.muted = true;
-            activeVideo.play().catch(() => {});
-          });
-        }
-      } else {
-        // For other videos, use normal logic
-        activeVideo.muted = !hasInteracted;
-        const playPromise = activeVideo.play();
-        if (playPromise && typeof playPromise.then === "function") {
-          playPromise.catch(() => {
-            // If autoplay fails, try muted play
-            activeVideo.muted = true;
-            activeVideo.play().catch(() => {});
-          });
-        }
+      // For videos, use normal logic
+      activeVideo.muted = !hasInteracted;
+      const playPromise = activeVideo.play();
+      if (playPromise && typeof playPromise.then === "function") {
+        playPromise.catch(() => {
+          // If autoplay fails, try muted play
+          activeVideo.muted = true;
+          activeVideo.play().catch(() => {});
+        });
       }
     }
   }, [selectedIndex, hasInteracted]);
 
+  const handleCarouselClick = (e: React.MouseEvent) => {
+    setHasInteracted(true);
+    localStorage.setItem("allowSound", "1");
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const carouselWidth = rect.width;
+    
+    // If click is on the right half, go to next slide
+    if (clickX > carouselWidth / 2) {
+      scrollNext();
+    } else {
+      // If click is on the left half, go to previous slide
+      scrollPrev();
+    }
+  };
+
   return (
     <div
-      className="relative h-screen w-full overflow-hidden"
+      className="relative h-screen w-full overflow-hidden cursor-pointer"
       onPointerDown={() => {
         setHasInteracted(true);
         localStorage.setItem("allowSound", "1");
@@ -184,10 +177,7 @@ export const FullscreenCarousel = () => {
         setHasInteracted(true);
         localStorage.setItem("allowSound", "1");
       }}
-      onClick={() => {
-        setHasInteracted(true);
-        localStorage.setItem("allowSound", "1");
-      }}
+      onClick={handleCarouselClick}
     >
       <div className="h-full" ref={emblaRef}>
         <div className="flex h-full">
@@ -224,25 +214,6 @@ export const FullscreenCarousel = () => {
         </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <Button
-        variant="carousel"
-        size="icon"
-        className="absolute left-6 top-1/2 -translate-y-1/2 z-10"
-        onClick={scrollPrev}
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </Button>
-      <Button
-        variant="carousel"
-        size="icon"
-        className="absolute right-6 top-1/2 -translate-y-1/2 z-10"
-        onClick={scrollNext}
-        aria-label="Next slide"
-      >
-        <ChevronRight className="h-6 w-6" />
-      </Button>
 
       {/* Dot Indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
